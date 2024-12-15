@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sys_gpio"
+version = "0.1.0"
+authors = [
+  { name="Desultory", email="dev@pyl.onl" },
+]
+description = "Super simple GPIO library for the Raspberry Pi, using sysfs."
+readme = "readme.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "zenlib >= 3.0.0",
+]
+
+[project.scripts]
+get_pin_value = "sys_gpio.get_pin_value:main"
