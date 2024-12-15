@@ -21,4 +21,4 @@ def get_pin_direction():
     print(pin.direction)
 
 def get_pin_exports():
-    print("Exported pins:" + ", ".join(Pin.get_exports()))
+    print("Exported pins:" + ", ".join(list(Pin.get_exports())))
