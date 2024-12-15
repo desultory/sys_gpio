@@ -64,7 +64,25 @@ class Pin:
         """ Gets the value of the pin """
         return int(self.read_param("value"))
 
+    @value.setter
+    def value(self, value):
+        """ Sets the value of the pin, sets the direction to out if not already set """
+        if value not in [0, 1]:
+            raise ValueError("Value must be either 0 or 1")
+        if self.direction != "out":
+            self.direction = "out"
+        with open(self.pin_path / "value", "wb") as f:
+            f.write(str(value).encode("ascii"))
+
     @property
     def direction(self):
         """ Gets the direction of the pin """
         return self.read_param("direction")
+
+    @direction.setter
+    def direction(self, value):
+        """ Sets the direction of the pin """
+        if value not in ["in", "out"]:
+            raise ValueError("Direction must be either 'in' or 'out'")
+        with open(self.pin_path / "direction", "wb") as f:
+            f.write(value.encode("ascii"))

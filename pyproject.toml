@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sys_gpio"
-version = "0.1.0"
+version = "0.2.0"
 authors = [
   { name="Desultory", email="dev@pyl.onl" },
 ]
@@ -22,5 +22,7 @@ dependencies = [
 
 [project.scripts]
 get_pin_value = "sys_gpio.cli_commands:get_pin_value"
+set_pin_value = "sys_gpio.cli_commands:set_pin_value"
 get_pin_direction = "sys_gpio.cli_commands:get_pin_direction"
+set_pin_direction = "sys_gpio.cli_commands:set_pin_direction"
 get_pin_exports = "sys_gpio.cli_commands:get_pin_exports"
