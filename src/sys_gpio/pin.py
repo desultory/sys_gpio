@@ -143,3 +143,6 @@ class Pin:
         self.poll_value(timeout)
         yield 1
         self.edge = original_edge
+
+    def __str__(self):
+        return f"<Pin {self.number} direction={self.direction} value={self.value}>"
