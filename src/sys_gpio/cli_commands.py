@@ -4,7 +4,7 @@ from zenlib.util import get_kwargs
 
 def get_pin_value():
     args = [
-            {"flags": ["pin"], "help": "Pin to get value from", "action": "store", "type": int},
+            {"flags": ["pin_number"], "help": "Pin to get value from", "action": "store", "type": int},
     ]
 
     kwargs = get_kwargs(package="sys_gpio", description="get pin value", arguments=args)
@@ -13,7 +13,7 @@ def get_pin_value():
 
 def get_pin_direction():
     args = [
-            {"flags": ["pin"], "help": "Pin to get direction from", "action": "store", "type": int},
+            {"flags": ["pin_number"], "help": "Pin to get direction from", "action": "store", "type": int},
     ]
 
     kwargs = get_kwargs(package="sys_gpio", description="get pin direction", arguments=args)
@@ -21,4 +21,4 @@ def get_pin_direction():
     print(pin.direction)
 
 def get_pin_exports():
-    print("Exported pins:" + ", ".Pin.get_exports())
+    print("Exported pins:" + ", ".join(Pin.get_exports()))
