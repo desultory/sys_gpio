@@ -21,4 +21,6 @@ dependencies = [
 ]
 
 [project.scripts]
-get_pin_value = "sys_gpio.get_pin_value:main"
+get_pin_value = "sys_gpio.cli_commands:get_pin_value"
+get_pin_direction = "sys_gpio.cli_commands:get_pin_direction"
+get_pin_exports = "sys_gpio.cli_commands:get_pin_exports"
