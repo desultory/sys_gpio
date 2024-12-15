@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from pathlib import Path
 
 from zenlib.logging import loggify
@@ -13,14 +14,14 @@ class Pin:
 
     @classmethod
     def get_exports(cls):
-        """ Get all GPIO pin exports, using the system index """
+        """Get all GPIO pin exports, using the system index"""
         for path in GPIO_PATH.glob("gpio*"):
             if str(path.name).startswith("gpiochip"):
                 continue
             yield int(path.name[4:])
 
     def export(self):
-        """ Exports the pin if it is not already exported """
+        """Exports the pin if it is not already exported"""
         self.logger.info("Exporting pin: %d", self.number)
         if self.exported:
             self.logger.warning("Pin is already exported: %d", self.number)
@@ -29,7 +30,7 @@ class Pin:
             f.write(str(self.pin_number).encode("ascii"))
 
     def unexport(self):
-        """ Unexports the pin if it is exported """
+        """Unexports the pin if it is exported"""
         self.logger.info("Unexporting pin: %d", self.number)
         if not self.exported:
             self.logger.warning("Pin is not exported: %d", self.number)
@@ -43,16 +44,16 @@ class Pin:
 
     @property
     def pin_number(self):
-        """ Return the pin number used in the sysfs interface """
+        """Return the pin number used in the sysfs interface"""
         return self.number + GPIO_INDEX_OFFSET
 
     @property
     def pin_path(self):
-        """ Get the path of the current pin in sysfs """
+        """Get the path of the current pin in sysfs"""
         return GPIO_PATH / f"gpio{self.pin_number}"
 
     def read_param(self, param_name):
-        """ Reads a parameter from /sys/class/gpio/gpioX/ """
+        """Reads a parameter from /sys/class/gpio/gpioX/"""
         if not self.exported:
             self.export()
 
@@ -61,12 +62,12 @@ class Pin:
 
     @property
     def value(self):
-        """ Gets the value of the pin """
+        """Gets the value of the pin"""
         return int(self.read_param("value"))
 
     @value.setter
     def value(self, value):
-        """ Sets the value of the pin, sets the direction to out if not already set """
+        """Sets the value of the pin, sets the direction to out if not already set"""
         if value not in [0, 1]:
             raise ValueError("Value must be either 0 or 1")
         if self.direction != "out":
@@ -76,13 +77,69 @@ class Pin:
 
     @property
     def direction(self):
-        """ Gets the direction of the pin """
+        """Gets the direction of the pin"""
         return self.read_param("direction")
 
     @direction.setter
     def direction(self, value):
-        """ Sets the direction of the pin """
+        """Sets the direction of the pin"""
         if value not in ["in", "out"]:
             raise ValueError("Direction must be either 'in' or 'out'")
         with open(self.pin_path / "direction", "wb") as f:
             f.write(value.encode("ascii"))
+
+    @property
+    def edge(self):
+        """Gets the edge of the pin"""
+        return self.read_param("edge")
+
+    @edge.setter
+    def edge(self, value):
+        """Sets the edge of the pin"""
+        if value not in ["none", "rising", "falling", "both"]:
+            raise ValueError("Edge must be either 'none', 'rising', 'falling' or 'both'")
+        with open(self.pin_path / "edge", "wb") as f:
+            f.write(value.encode("ascii"))
+
+    def poll_value(self, timeout=5):
+        """Polls the value of the pin"""
+        from select import select
+
+        with open(self.pin_path / "value", "rb") as f:
+            f.read()
+            readable, _, exceptional = select([], [], [f], timeout)
+
+    @contextmanager
+    def on_rise(self, timeout=1):
+        """Sets the edge to rising, and then polls the value until it changes.
+        Yields 1 if the value ended high, 0 if the value ended low."""
+        original_edge = self.edge
+        self.edge = "rising"
+        self.poll_value(timeout)
+        if self.value == 0:
+            yield 0
+        else:
+            yield 1
+        self.edge = original_edge
+
+    @contextmanager
+    def on_fall(self, timeout=1):
+        """Sets the edge to falling, and then polls the value until it changes.
+        Yields 1 if the value ended low, 0 if the value ended high."""
+        original_edge = self.edge
+        self.edge = "falling"
+        self.poll_value(timeout)
+        if self.value == 1:
+            yield 0
+        else:
+            yield 1
+        self.edge = original_edge
+
+    @contextmanager
+    def on_change(self, timeout=1):
+        """Sets the edge to both, and then polls the value until it changes"""
+        original_edge = self.edge
+        self.edge = "both"
+        self.poll_value(timeout)
+        yield 1
+        self.edge = original_edge
