@@ -60,6 +60,14 @@ class Pin:
         with open(self.pin_path / param_name, "rb") as f:
             return f.read().decode("ascii").strip()
 
+    def write_param(self, param_name, value):
+        """Writes a parameter to /sys/class/gpio/gpioX/"""
+        if not self.exported:
+            self.export()
+
+        with open(self.pin_path / param_name, "wb") as f:
+            f.write(value.encode("ascii"))
+
     @property
     def value(self):
         """Gets the value of the pin"""
@@ -72,8 +80,7 @@ class Pin:
             raise ValueError("Value must be either 0 or 1")
         if self.direction != "out":
             self.direction = "out"
-        with open(self.pin_path / "value", "wb") as f:
-            f.write(str(value).encode("ascii"))
+        self.write_param("value", str(value))
 
     @property
     def direction(self):
@@ -85,8 +92,7 @@ class Pin:
         """Sets the direction of the pin"""
         if value not in ["in", "out"]:
             raise ValueError("Direction must be either 'in' or 'out'")
-        with open(self.pin_path / "direction", "wb") as f:
-            f.write(value.encode("ascii"))
+        self.write_param("direction", value)
 
     @property
     def edge(self):
@@ -98,8 +104,7 @@ class Pin:
         """Sets the edge of the pin"""
         if value not in ["none", "rising", "falling", "both"]:
             raise ValueError("Edge must be either 'none', 'rising', 'falling' or 'both'")
-        with open(self.pin_path / "edge", "wb") as f:
-            f.write(value.encode("ascii"))
+        self.write_param("edge", value)
 
     def poll_value(self, timeout=5):
         """Polls the value of the pin"""
