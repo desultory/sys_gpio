@@ -4,13 +4,14 @@ from pathlib import Path
 from zenlib.logging import loggify
 
 GPIO_PATH = Path("/sys/class/gpio")
-GPIO_INDEX_OFFSET = 512
 
 
 @loggify
 class Pin:
-    def __init__(self, pin_number, *args, **kwargs):
+    DEFAULT_PIN_INDEX_OFFSET = 512
+    def __init__(self, pin_number, pin_index_offset=None, *args, **kwargs):
         self.number = int(pin_number)
+        self.pin_index_offset = int(pin_index_offset) if pin_index_offset is not None else self.DEFAULT_PIN_INDEX_OFFSET
 
     @classmethod
     def get_exports(cls):
@@ -45,7 +46,7 @@ class Pin:
     @property
     def pin_number(self):
         """Return the pin number used in the sysfs interface"""
-        return self.number + GPIO_INDEX_OFFSET
+        return self.number + self.pin_index_offset
 
     @property
     def pin_path(self):

@@ -2,30 +2,33 @@ from zenlib.util import get_kwargs
 
 from sys_gpio import Pin
 
+DEFAULT_ARGS = [
+    {"flags": ["pin_number"], "help": "Pin number to operate on", "action": "store", "type": int},
+    {
+        "flags": ["--pin-offset"],
+        "help": "Pin index offset for exporting, defaults to 512 for Raspberry Pi",
+        "dest": "pin_index_offset",
+        "action": "store",
+        "type": int,
+        "default": 512,
+    },
+]
+
 
 def get_pin_value():
-    args = [
-        {"flags": ["pin_number"], "help": "Pin to get value from", "action": "store", "type": int},
-    ]
-
-    kwargs = get_kwargs(package="sys_gpio", description="get pin value", arguments=args)
+    kwargs = get_kwargs(package="sys_gpio", description="get pin value", arguments=DEFAULT_ARGS)
     pin = Pin(**kwargs)
     print(pin.value)
 
 
 def get_pin_direction():
-    args = [
-        {"flags": ["pin_number"], "help": "Pin to get direction from", "action": "store", "type": int},
-    ]
-
-    kwargs = get_kwargs(package="sys_gpio", description="get pin direction", arguments=args)
+    kwargs = get_kwargs(package="sys_gpio", description="get pin direction", arguments=DEFAULT_ARGS)
     pin = Pin(**kwargs)
     print(pin.direction)
 
 
 def set_pin_value():
-    args = [
-        {"flags": ["pin_number"], "help": "Pin to set value to", "action": "store", "type": int},
+    args = DEFAULT_ARGS + [
         {"flags": ["value"], "help": "Value to set", "action": "store", "type": int, "choices": [0, 1]},
     ]
 
@@ -36,8 +39,7 @@ def set_pin_value():
 
 
 def set_pin_direction():
-    args = [
-        {"flags": ["pin_number"], "help": "Pin to set direction to", "action": "store", "type": int},
+    args = DEFAULT_ARGS + [
         {"flags": ["direction"], "help": "Direction to set", "action": "store", "choices": ["in", "out"]},
     ]
 
