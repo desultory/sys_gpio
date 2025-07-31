@@ -23,24 +23,25 @@ class Pin:
 
     def export(self):
         """Exports the pin if it is not already exported"""
-        self.logger.info("Exporting pin: %d", self.number)
+        self.logger.info("Exporting pin: %d", self.pin_number)
         if self.exported:
-            self.logger.warning("Pin is already exported: %d", self.number)
+            self.logger.warning("Pin is already exported: %d", self.pin_number)
             return
         with open(GPIO_PATH / "export", "wb") as f:
             f.write(str(self.pin_number).encode("ascii"))
 
     def unexport(self):
         """Unexports the pin if it is exported"""
-        self.logger.info("Unexporting pin: %d", self.number)
+        self.logger.info("Unexporting pin: %d", self.pin_number)
         if not self.exported:
-            self.logger.warning("Pin is not exported: %d", self.number)
+            self.logger.warning("Pin is not exported: %d", self.pin_number)
             return
         with open(GPIO_PATH / "unexport", "wb") as f:
             f.write(str(self.pin_number).encode("ascii"))
 
     @property
     def exported(self):
+        self.logger.debug(f"[Pin {self.pin_number}] Checking if pin is exported: {[p for p in self.get_exports()]}")
         return self.pin_number in self.get_exports()
 
     @property
@@ -57,6 +58,8 @@ class Pin:
         """Reads a parameter from /sys/class/gpio/gpioX/"""
         if not self.exported:
             self.export()
+
+        self.logger.debug(f"[{self.pin_path}] Reading parameter: {param_name}")
 
         with open(self.pin_path / param_name, "rb") as f:
             return f.read().decode("ascii").strip()
@@ -151,4 +154,4 @@ class Pin:
         self.edge = original_edge
 
     def __str__(self):
-        return f"<Pin {self.number} direction={self.direction} value={self.value}>"
+        return f"<Pin {self.pin_number} direction={self.direction} value={self.value}>"
